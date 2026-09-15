@@ -1,8 +1,18 @@
 # Version History
 
-## Since 1.6.12
+## Version 1.6.13
 
-- Improved macb driver performance
+- Made the macb (Cadence GEM) EtherCAT RX path allocation-free to
+  avoid receive latency spikes under host memory pressure.
+- Included macb in the device driver table and fixed a
+  `CONFIG_MACB_USE_HWSTAMP` build issue.
+- Use `strscpy` instead of the deprecated `strncpy` in kernel space,
+  with a fallback for Linux < 4.2.
+- Added a test build for kernel 6.18.
+- Improved `ecrt_slave_config_dc()` documentation.
+- Adopted the CPPlint configuration of stable-1.7, fixed CPPlint
+  complaints and added exceptions for device drivers.
+- Use an own pre-commit container with cache in CI.
 
 ## Version 1.6.12
 
