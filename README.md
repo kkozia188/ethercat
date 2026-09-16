@@ -1,3 +1,25 @@
+# rt-control 补丁分支说明
+
+本仓库镜像自 [gitlab.com/etherlab.org/ethercat](https://gitlab.com/etherlab.org/ethercat)（IgH EtherCAT Master），
+供 [SevenovaHangzhou/robot_driver](https://github.com/SevenovaHangzhou/robot_driver)
+（拆码垛机器人 RT-Control 实时控制域）使用；`docker/rt-control/Dockerfile` 与
+`hostsetup/igh-install.sh` 从本仓库 `rt-control` 分支构建主站。
+
+`rt-control` 分支 = 上游 `stable-1.6` 基线 `2f7f884f` + 以下补丁（按序，每补丁一个 commit）：
+
+| # | 补丁 | 改动说明 |
+| --- | --- | --- |
+| 0001 | preserve-verified-pdo-config | 从站 PDO 配置与已验证配置一致时跳过重配置，保留固定映射（PDO FSM / 从站配置 FSM） |
+| 0002 | dc-offset-use-sent-application-time | DC 偏移计算改用实际已发送的应用时间，修正同步偏移来源 |
+| 0003 | preop-only-coe | CoE（SDO）通信限制在 PREOP 状态进行，避免运行期邮箱流量干扰 1 kHz 周期数据 |
+
+**升级方式**：fetch 上游并快进本仓库 `stable-1.6` 分支 → 将 `rt-control` rebase 到新基线 →
+按 robot_driver 测试体系重新验证 → 更新 robot_driver 的 `versions.env`（IGH_COMMIT）。
+
+本仓库遵循上游 GPL 授权条款。
+
+---
+
 # The IgH EtherCAT Master
 
 [[_TOC_]]
