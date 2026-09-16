@@ -49,6 +49,12 @@ uint8_t *ec_slave_mbox_prepare_send(const ec_slave_t *slave, /**< slave */
     size_t total_size;
     int ret;
 
+    /* All CoE SDO and dictionary requests must precede OP activation. */
+    if (type == EC_MBOX_TYPE_COE
+            && slave->current_state != EC_SLAVE_STATE_PREOP) {
+        return ERR_PTR(-EPERM);
+    }
+
     if (unlikely(!slave->sii.mailbox_protocols)) {
         EC_SLAVE_ERR(slave, "Slave does not support mailbox"
                 " communication!\n");

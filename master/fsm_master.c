@@ -630,8 +630,7 @@ void ec_fsm_master_action_idle(
                 || (slave->sii.has_general
                     && !slave->sii.coe_details.enable_sdo_info)
                 || slave->sdo_dictionary_fetched
-                || slave->current_state == EC_SLAVE_STATE_INIT
-                || slave->current_state == EC_SLAVE_STATE_UNKNOWN
+                || slave->current_state != EC_SLAVE_STATE_PREOP
                 || jiffies - slave->jiffies_preop < EC_WAIT_SDO_DICT * HZ) {
             continue;
         }

@@ -216,6 +216,12 @@ void ec_fsm_coe_transfer(
     fsm->slave = slave;
     fsm->request = request;
 
+    if (slave->current_state != EC_SLAVE_STATE_PREOP) {
+        request->errno = EPERM;
+        fsm->state = ec_fsm_coe_error;
+        return;
+    }
+
     if (request->dir == EC_DIR_OUTPUT) {
         fsm->state = ec_fsm_coe_down_start;
     }
