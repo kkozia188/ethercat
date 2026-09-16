@@ -1006,6 +1006,7 @@ void ec_master_send_datagrams(
     cycles_t cycles_start, cycles_sent, cycles_end;
 #endif
     unsigned long jiffies_sent;
+    u64 app_time_sent;
     unsigned int frame_count, more_datagrams_waiting;
     struct list_head sent_datagrams;
 
@@ -1091,6 +1092,7 @@ void ec_master_send_datagrams(
         EC_MASTER_DBG(master, 2, "frame size: %zu\n", cur_data - frame_data);
 
         // send frame
+        app_time_sent = master->app_time;
         ec_device_send(&master->devices[device_index],
                 cur_data - frame_data);
 #ifdef EC_HAVE_CYCLES
@@ -1104,6 +1106,7 @@ void ec_master_send_datagrams(
             datagram->cycles_sent = cycles_sent;
 #endif
             datagram->jiffies_sent = jiffies_sent;
+            datagram->app_time_sent = app_time_sent;
             list_del_init(&datagram->sent); // remove from sent queue
             smp_store_release(&datagram->state, EC_DATAGRAM_SENT);
         }
