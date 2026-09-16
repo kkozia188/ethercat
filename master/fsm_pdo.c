@@ -114,6 +114,25 @@ void ec_fsm_pdo_print(
 
 /****************************************************************************/
 
+/** Return non-zero when the slave configuration must be verified without
+ * writing its PDO mapping or assignment objects.
+ */
+int ec_fsm_pdo_conf_preserve_config(
+        const ec_fsm_pdo_t *fsm /**< PDO configuration state machine. */
+        )
+{
+    ec_flag_t *flag;
+
+    if (!fsm->slave->config)
+        return 0;
+
+    flag = ec_slave_config_find_flag(fsm->slave->config,
+            "PreservePdoConfig");
+    return flag && flag->value;
+}
+
+/****************************************************************************/
+
 /** Start reading the PDO configuration.
  */
 void ec_fsm_pdo_start_reading(
@@ -528,6 +547,27 @@ void ec_fsm_pdo_conf_action_check_mapping(
         ec_datagram_t *datagram /**< Datagram to use. */
         )
 {
+    if (ec_fsm_pdo_conf_preserve_config(fsm)) {
+        if (ec_pdo_equal_entries(fsm->pdo, &fsm->slave_pdo)) {
+            EC_SLAVE_DBG(fsm->slave, 1,
+                    "Preserving verified mapping of PDO 0x%04X.\n",
+                    fsm->pdo->index);
+            ec_fsm_pdo_conf_action_next_pdo_mapping(fsm, datagram);
+        }
+        else {
+            EC_SLAVE_ERR(fsm->slave, "PDO 0x%04X mapping differs while "
+                    "PreservePdoConfig is set.\n", fsm->pdo->index);
+            EC_SLAVE_ERR(fsm->slave, "");
+            printk(KERN_CONT "Currently mapped PDO entries: ");
+            ec_pdo_print_entries(&fsm->slave_pdo);
+            printk(KERN_CONT ". Entries required: ");
+            ec_pdo_print_entries(fsm->pdo);
+            printk(KERN_CONT "\n");
+            fsm->state = ec_fsm_pdo_state_error;
+        }
+        return;
+    }
+
     // check, if slave supports PDO configuration
     if ((fsm->slave->sii.mailbox_protocols & EC_MBOX_COE)
             && fsm->slave->sii.has_general
@@ -603,6 +643,22 @@ void ec_fsm_pdo_conf_action_check_assignment(
         ec_datagram_t *datagram /**< Datagram to use. */
         )
 {
+    if (ec_fsm_pdo_conf_preserve_config(fsm)) {
+        if (ec_pdo_list_equal(&fsm->sync->pdos, &fsm->pdos)) {
+            EC_SLAVE_DBG(fsm->slave, 1,
+                    "Preserving verified PDO assignment of SM%u.\n",
+                    fsm->sync_index);
+            ec_fsm_pdo_conf_action_next_sync(fsm, datagram);
+        }
+        else {
+            EC_SLAVE_ERR(fsm->slave, "PDO assignment of SM%u differs while "
+                    "PreservePdoConfig is set.\n", fsm->sync_index);
+            EC_SLAVE_ERR(fsm->slave, ""); ec_fsm_pdo_print(fsm);
+            fsm->state = ec_fsm_pdo_state_error;
+        }
+        return;
+    }
+
     if ((fsm->slave->sii.mailbox_protocols & EC_MBOX_COE)
             && fsm->slave->sii.has_general
             && fsm->slave->sii.coe_details.enable_pdo_assign) {

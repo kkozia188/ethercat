@@ -1043,6 +1043,13 @@ void ec_fsm_slave_config_state_pdo_conf(
 
     if (!ec_fsm_pdo_success(fsm->fsm_pdo)) {
         EC_SLAVE_WARN(fsm->slave, "PDO configuration failed.\n");
+        if (ec_fsm_pdo_conf_preserve_config(fsm->fsm_pdo)) {
+            EC_SLAVE_ERR(fsm->slave,
+                    "Refusing unverified preserved PDO configuration.\n");
+            fsm->slave->error_flag = 1;
+            fsm->state = ec_fsm_slave_config_state_error;
+            return;
+        }
     }
 
     ec_fsm_slave_config_enter_watchdog_divider(fsm);

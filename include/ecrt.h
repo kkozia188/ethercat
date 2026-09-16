@@ -1954,6 +1954,11 @@ EC_PUBLIC_API int ecrt_slave_config_idn(
  * - WaitBeforeSAFEOPms: Number of milliseconds to wait before commanding the
  *   transition from PREOP to SAFEOP. This can be used as a workaround for
  *   slaves that need a little time to initialize.
+ * - PreservePdoConfig: Non-zero verifies configured PDO mappings and
+ *   assignments against the configuration discovered from the slave and
+ *   refuses a mismatch instead of writing the CoE PDO configuration objects.
+ *   This is intended for slaves whose PDO mappings are fixed or otherwise
+ *   read-only.
  *
  * This method has to be called in non-realtime context before
  * ecrt_master_activate().

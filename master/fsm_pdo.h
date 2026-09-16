@@ -70,6 +70,7 @@ void ec_fsm_pdo_start_configuration(ec_fsm_pdo_t *, ec_slave_t *);
 
 int ec_fsm_pdo_exec(ec_fsm_pdo_t *, ec_datagram_t *);
 int ec_fsm_pdo_success(const ec_fsm_pdo_t *);
+int ec_fsm_pdo_conf_preserve_config(const ec_fsm_pdo_t *);
 
 /****************************************************************************/
 
